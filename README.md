@@ -1,6 +1,6 @@
 # Socket Server Infrastructure
 
-Yet another Socket Server infrastructure with "Unix Domain Socket" (UDS) (SOCK_DGRAM) and "TCP" (SOCK_STREAM) socket implementation.
+Yet another Socket Server infrastructure with "Unix Domain Socket" (UDS) (AF_UNIX/SOCK_STREAM) and "TCP" (AF_INET/SOCK_STREAM) socket implementation. (UPD (AF_INET/SOCK_DGRAM) is not completely finished yet.)
 
 You can develop your own high-performance Client/Server implementation and easily switch between "Unix Domain Socket" or "TCP" implementation.
 
