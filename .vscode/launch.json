@@ -55,6 +55,31 @@
             ]
         },
         {
+            "name": "ServerUDP",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/SocketServerUDP",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "CMake: build",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "ClientUDS",
             "type": "cppdbg",
             "request": "launch",
@@ -84,6 +109,31 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/SocketClientTCP",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "CMake: build",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "ClientUDP",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/SocketClientUDP",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
