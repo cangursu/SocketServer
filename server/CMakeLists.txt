@@ -26,7 +26,7 @@ add_executable(SocketServerTCP src/main.cpp ${HEADER})
 target_compile_definitions(SocketServerTCP PUBLIC FDBASE_TCP)
 
 add_executable(SocketServerUDP src/main.cpp ${HEADER})
-target_compile_definitions(SocketServerUDP PUBLIC FDBASE_TCP)
+target_compile_definitions(SocketServerUDP PUBLIC FDBASE_UDP)
 
 #      add_executable(SocketServerUDS src/mainUds.cpp src/cli.cpp inc/cli.h)
 #      #set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME SocketServer)

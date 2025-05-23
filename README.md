@@ -45,7 +45,7 @@ Instructions on how to install and set up your project. Include any prerequisite
 You can find examples in the `server` and `client` folders for Server and Client usage.
 
 ### Server
-The `server/src/main.cpp` file demonstrates a `SocketServer` implementation for TCP and UDS. The `SocketServerImpl` is a sample Server implementation that receives a string from clients and prints it to the STDOUT stream. You can see how to use TCP or UDS `SocketServer` with `FDBASE_UDS` and `FDBASE_TCP` preprocessors.
+The `server/src/main.cpp` file demonstrates a `SocketServer` implementation for TCP and UDS. The `EchoServer` is a sample Server implementation that receives a string from clients and prints it to the STDOUT stream. You can see how to use TCP or UDS `SocketServer` with `FDBASE_UDS` and `FDBASE_TCP` preprocessors.
 
 1. Execute the compiled server binary:
     ```sh
@@ -54,7 +54,7 @@ The `server/src/main.cpp` file demonstrates a `SocketServer` implementation for 
     ```
 
 ### Client
-The `client/src/main.cpp` file demonstrates a `SocketClient` implementation. This example shows you how to switch between TCP and UDS via `FDBASE_TCP` or `FDBASE_UDS`, which is quite similar to `SocketServerImpl`. The `SocketClientImpl` is your client implementation, and in this example, the client sends a string (without a null terminator) to the server but does not receive anything.
+The `client/src/main.cpp` file demonstrates a `SocketClient` implementation. This example shows you how to switch between TCP and UDS via `FDBASE_TCP` or `FDBASE_UDS`, which is quite similar to `EchoServer`. The `EchoClient` is your client implementation, and in this example, the client sends a string (without a null terminator) to the server but does not receive anything.
 
 1. Execute the compiled client binary:
     ```sh

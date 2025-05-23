@@ -25,6 +25,9 @@ target_compile_definitions(SocketClientUDS PUBLIC FDBASE_UDS)
 add_executable(SocketClientTCP ${SOURCE} ${HEADER})
 target_compile_definitions(SocketClientTCP PUBLIC FDBASE_TCP)
 
+add_executable(SocketClientUDP ${SOURCE} ${HEADER})
+target_compile_definitions(SocketClientUDP PUBLIC FDBASE_UDP)
+
 # source_group("Header include" FILES ${HEADER})
 # source_group("Source src"     FILES ${SOURCE})
 
@@ -35,7 +38,11 @@ target_include_directories(SocketClientUDS
 target_include_directories(SocketClientTCP
             PRIVATE  "inc"
             PRIVATE   "${EVSRV_LIB}/inc" )
+target_include_directories(SocketClientUDP
+            PRIVATE  "inc"
+            PRIVATE   "${EVSRV_LIB}/inc" )
 
 # target_link_libraries(${PROJECT_NAME} -lpthread -lboost_system -lssl -lcrypto -lrt)
 target_link_libraries(SocketClientUDS SocketServer)
 target_link_libraries(SocketClientTCP SocketServer)
+target_link_libraries(SocketClientUDP SocketServer)

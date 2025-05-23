@@ -2,6 +2,7 @@
 #include "SocketServer.hpp"
 #include "FdBaseUds.hpp"
 #include "FdBaseTcp.hpp"
+#include "FdBaseUdp.hpp"
 #include "PThread.hpp"
 #include "cli.h"
 
@@ -12,62 +13,64 @@
 using FdBase = FdBaseUds;
 #elif defined FDBASE_TCP
 using FdBase = FdBaseTcp;
+#elif defined FDBASE_UDP
+using FdBase = FdBaseUdp;
 #else
 #error "NO FdBase implemantaiton defined"
 #endif
 
 
-class SocketServerImpl
-    : public FdBase
+class EchoServer
+    : public SocketServer<EchoServer, FdBase, PThread>
 {
     public :
-        ~SocketServerImpl()                                              { _server.Release();                                    }
+        ~EchoServer()   { SocketServer<EchoServer, FdBase, PThread>::Release();                                    }
 
 #if defined FDBASE_UDS
-        SocketServerImpl() : FdBase("/tmp/socket")                       {                                                       }
+        EchoServer() : SocketServer<EchoServer, FdBase, PThread>("/tmp/socket") {}
 #elif defined FDBASE_TCP
-        SocketServerImpl() : FdBase("127.0.0.1", 12123)                  {                                                       }
+        EchoServer() : SocketServer<EchoServer, FdBase, PThread>("127.0.0.1", 8888) {}
+#elif defined FDBASE_UDP
+        EchoServer() : SocketServer<EchoServer, FdBase, PThread>(8888) {}
 #endif
 
+        void            Release(bool doUnlink = false)                  { return SocketServer<EchoServer, FdBase, PThread>::Release(doUnlink);  }
+        ESRV_RETCODE    InitServer(/*const std::string &key*/)          { return SocketServer<EchoServer, FdBase, PThread>::InitServer();       }
+        ESRV_RETCODE    Start()                                         { return SocketServer<EchoServer, FdBase, PThread>::Start();            }
+        void            Stop()                                          { return SocketServer<EchoServer, FdBase, PThread>::Stop();             }
+        ESRV_RETCODE    SetListener()                                   { return SocketServer<EchoServer, FdBase, PThread>::SetListener();      }
 
-        void            Release(bool doUnlink = false)                  { return _server.Release(doUnlink);                     }
-        ESRV_RETCODE    InitServer(/*const std::string &key*/)          { return _server.InitServer();                          }
-        ESRV_RETCODE    Start()                                         { return _server.Start();                               }
-        void            Stop()                                          { return _server.Stop();                                }
-        ESRV_RETCODE    SetListener(size_t idx, SocketServerImpl *client){ return _server.SetListener(idx, client, client);     }
 
-
-        void Payload(/*const*/ ::Payload &pack) /*const*/;
-
-        SocketServer<SocketServerImpl, FdBase, PThread, 1> _server;
+        void OnPayload(FdBase &client, /*const*/ ::Payload &pack) /*const*/;
 };
 
-void SocketServerImpl::Payload(/*const*/ ::Payload &packet) /*const*/
+void EchoServer::OnPayload(FdBase &client, /*const*/ ::Payload &packet) /*const*/
 {
-    //std::cout   << "\n" << __PRETTY_FUNCTION__            << std::endl;
-    //std::cout   << "SocketServerImpl::Payload Packet  : " << std::endl;
-    std::cout   << to_string(packet)  << std::endl;
+    LOG_INFO   << "EchoServer::Payload Packet (" << client.Fd() << ") : " << std::endl;
+    LOG_INFO   << to_string(packet)  << std::endl;
+
+    SocketServer<EchoServer, FdBase, PThread>::Send(&client, packet._packet, packet._len);
 }
 
 
 
 
 
-CLI_RETCODE CmdExit(SocketServerImpl &server, const char * /*cline*/)
+CLI_RETCODE CmdExit(EchoServer &server, const char * /*cline*/)
 {
-    std::cout << __func__ << std::endl;
+    LOG_INFO << __func__ << std::endl;
     server.Stop();
 
     return CLI_RETCODE::ERROR_QUIT;
 }
 
 
-CLI_RETCODE CmdStart(SocketServerImpl &server, const char * /*cline*/)
+CLI_RETCODE CmdStart(EchoServer &server, const char * /*cline*/)
 {
     if (ESRV_RETCODE::SUCCESS != server.Start())
     {
-        std::cout << "Unable to Start" << std::endl;
-        std::cout << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
+        LOG_INFO << "Unable to Start" << std::endl;
+        LOG_INFO << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
         return CLI_RETCODE::ERROR_QUIT;
     }
 
@@ -75,9 +78,9 @@ CLI_RETCODE CmdStart(SocketServerImpl &server, const char * /*cline*/)
 }
 
 
-CLI_RETCODE CmdStop(SocketServerImpl &server, const char * /*cline*/)
+CLI_RETCODE CmdStop(EchoServer &server, const char * /*cline*/)
 {
-    std::cout << __func__ << std::endl;
+    LOG_INFO << __func__ << std::endl;
     server.Stop();
 
     return CLI_RETCODE::SUCCESS;
@@ -91,17 +94,19 @@ CLI_RETCODE CmdStop(SocketServerImpl &server, const char * /*cline*/)
 int main(int /*argc*/, const char * /*argv*/[])
 {
 #if defined FDBASE_UDS
-    std::cout << "Hello Unix Domain Socket Server V1.0" << std::endl;
+    LOG_INFO << "Hello Unix Domain Socket Server V1.0" << std::endl;
 #elif defined FDBASE_TCP
-    std::cout << "Hello TCP Socket Server V1.0" << std::endl;
+    LOG_INFO << "Hello TCP Socket Server V1.0" << std::endl;
+#elif defined FDBASE_UDP
+    LOG_INFO << "Hello UDP Socket Server V1.0" << std::endl;
 #else
-    std::cout << "NO FdBase implemantaiton defined" << std::endl;
+    LOG_INFO << "NO FdBase implemantaiton defined" << std::endl;
     return -1;
 #endif
 
 
 
-    CmdMap<SocketServerImpl> mapCmd("mapCmd");
+    CmdMap<EchoServer> mapCmd("mapCmd");
     mapCmd["exit"]  = { "Exit",         "Quits the program",    CmdExit     };
     mapCmd["quit"]  = { "Exit",         "Quits the program",    CmdExit     };
     mapCmd["q"]     = { "Exit",         "Quits the program",    CmdExit     };
@@ -111,19 +116,19 @@ int main(int /*argc*/, const char * /*argv*/[])
 
 
     ESRV_RETCODE rc = ESRV_RETCODE::NA;
-    SocketServerImpl server;
+    EchoServer server;
 
     if (ESRV_RETCODE::SUCCESS != (rc = server.InitServer()))
     {
-        std::cout << "Unabel to create Server" << std::endl;
-        std::cout << "rc : " << to_string(rc) << ", errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
+        LOG_INFO << "Unabel to create Server" << std::endl;
+        LOG_INFO << "rc : " << to_string(rc) << ", errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
         return -1;
     }
 
-    if (ESRV_RETCODE::SUCCESS != (rc = server.SetListener(0, &server)))
+    if (ESRV_RETCODE::SUCCESS != (rc = server.SetListener()))
     {
-        std::cout << "Unabel to add listener" << std::endl;
-        std::cout << "rc : " << to_string(rc) << ", errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
+        LOG_INFO << "Unabel to add listener" << std::endl;
+        LOG_INFO << "rc : " << to_string(rc) << ", errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
         return -1;
     }
 
