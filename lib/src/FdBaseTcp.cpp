@@ -7,6 +7,15 @@
 //#include <sys/epoll.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <iostream>
+
+
+const char * ErrnoText(int eno);
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+#define LOG_DEBUG (std::cout <<         "(" << __FILENAME__ << ":" << __LINE__ << ") ")
+#define LOG_ERROR (std::cout << "ERROR : (" << __FILENAME__ << ":" << __LINE__ << ") ")
+#define LOG_INFO  (std::cout <<         "(" << __FILENAME__ << ":" << __LINE__ << ") ")
 
 
 
@@ -18,18 +27,6 @@ FdBaseTcp::FdBaseTcp()
 
 FdBaseTcp::FdBaseTcp(const std::string &ip, uint16_t port)
     : _ip(ip)
-    , _port(port)
-{
-}
-
-FdBaseTcp::FdBaseTcp(int fd)
-    : _fd (fd)
-{
-}
-
-FdBaseTcp::FdBaseTcp(const std::string &ip, uint16_t port, int fd)
-    : _fd (fd)
-    , _ip(ip)
     , _port(port)
 {
 }
@@ -79,7 +76,10 @@ bool FdBaseTcp::Init()
     std::memset(&_addr, '\0', sizeof(_addr));
     _addr.sin_family        = AF_INET;
     _addr.sin_port          = htons(_port);
-    _addr.sin_addr.s_addr   = inet_addr(_ip.data());
+    if (_ip.empty())
+        _addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    else
+        _addr.sin_addr.s_addr = inet_addr(_ip.data());
 
     return true;
 }
@@ -121,15 +121,15 @@ bool FdBaseTcp::Listen()
         // SO_REUSEADDR ???
         if (SOCKET_INVALID == bind(_fd, (struct sockaddr*)&_addr, sizeof(_addr)))
         {
-            //LOG_ERROR << "Unable to bind " << std::endl;
-            //LOG_ERROR << "errno : " << errno << ", " << ErrnoText(errno) << std::endl;
+            LOG_ERROR << "Unable to bind " << std::endl;
+            LOG_ERROR << "errno : " << errno << ", " << ErrnoText(errno) << std::endl;
             return false;
         }
 
         if (SOCKET_INVALID == listen(_fd, 128))
         {
-            //LOG_ERROR << "Unable to listen " << std::endl;
-            //LOG_ERROR << "errno : " << errno << ", " << ErrnoText(errno) << std::endl;
+            LOG_ERROR << "Unable to listen " << std::endl;
+            LOG_ERROR << "errno : " << errno << ", " << ErrnoText(errno) << std::endl;
             return false;
         }
     }

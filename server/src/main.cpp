@@ -20,6 +20,9 @@ using FdBase = FdBaseUdp;
 #endif
 
 
+#define DEFAULT_PORT 19000
+
+
 class EchoServer
     : public SocketServer<EchoServer, FdBase, PThread>
 {
@@ -29,9 +32,9 @@ class EchoServer
 #if defined FDBASE_UDS
         EchoServer() : SocketServer<EchoServer, FdBase, PThread>("/tmp/socket") {}
 #elif defined FDBASE_TCP
-        EchoServer() : SocketServer<EchoServer, FdBase, PThread>("127.0.0.1", 8888) {}
+        EchoServer() : SocketServer<EchoServer, FdBase, PThread>("", DEFAULT_PORT) {}
 #elif defined FDBASE_UDP
-        EchoServer() : SocketServer<EchoServer, FdBase, PThread>(8888) {}
+        EchoServer() : SocketServer<EchoServer, FdBase, PThread>("", DEFAULT_PORT) {}
 #endif
 
         void            Release(bool doUnlink = false)                  { return SocketServer<EchoServer, FdBase, PThread>::Release(doUnlink);  }

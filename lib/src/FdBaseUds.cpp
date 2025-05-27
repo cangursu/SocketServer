@@ -18,17 +18,6 @@ FdBaseUds::FdBaseUds(const std::string &key)
 {
 }
 
-FdBaseUds::FdBaseUds(int fd)
-    : _fd (fd)
-{
-}
-
-FdBaseUds::FdBaseUds(const std::string &key, int fd)
-    : _fd (fd)
-    , _key(key)
-{
-}
-
 int FdBaseUds::Fd() const
 {
     return _fd;

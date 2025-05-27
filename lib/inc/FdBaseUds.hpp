@@ -20,8 +20,6 @@ public:
 
     FdBaseUds();
     FdBaseUds(const std::string &key);
-    FdBaseUds(const std::string &key, int fd);
-    FdBaseUds(int fd);
 
     int     Fd() const;
     void    Fd(int fd) ;
