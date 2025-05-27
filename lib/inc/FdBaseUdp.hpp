@@ -20,8 +20,7 @@ public:
     static constexpr int FD_INVALID = -1;
 
     FdBaseUdp();
-    FdBaseUdp(uint16_t port);
-    FdBaseUdp(uint16_t port, int fd);
+    FdBaseUdp(const std::string &ip, uint16_t port);
 
     int     Fd() const;
     void    Fd(int fd) ;
@@ -40,7 +39,7 @@ public:
 private :
 
     int         _fd = FD_INVALID;
-
+    std::string _ip;
     uint16_t    _port = 0;
     sockaddr_in _addr {};
     sockaddr_in _addrClient {};

@@ -21,8 +21,6 @@ public:
 
     FdBaseTcp();
     FdBaseTcp(const std::string &ip, uint16_t port);
-    FdBaseTcp(const std::string &ip, uint16_t port, int fd);
-    FdBaseTcp(int fd);
 
     int     Fd() const;
     void    Fd(int fd) ;

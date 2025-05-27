@@ -347,32 +347,21 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Wait()
         {
 //            LOG_DEBUG <<  "epoll_event : \n" << ::to_string(events[i]) << std::endl;
 
-            bool isAccepted = false;
-
             TFdBaseSock *sock = &_fdSock;
-//            for (auto &srv : _listServerFd)
+            if (sock && (events[i].data.fd == /*srv._pSock*/sock->Fd()))
             {
-                if (sock && (events[i].data.fd == /*srv._pSock*/sock->Fd()))
+                TFdBaseSock fd;
+                if (ESRV_RETCODE::SUCCESS != ClientAccept(sock/*srv._pSock*/, fd))
                 {
-                    TFdBaseSock fd;
-                    if (ESRV_RETCODE::SUCCESS != ClientAccept(sock/*srv._pSock*/, fd))
-                    {
-                        LOG_ERROR << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
-//                        continue;
-                    }
-                    else if (ESRV_RETCODE::SUCCESS != ClientAdd(/*&srv,*/ fd))
-                    {
-                        LOG_ERROR << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
-//                        continue;
-                    }
-
-                    isAccepted = true;
-                    LOG_INFO << "Client Connected" << std::endl;
-                    continue;
+                    LOG_ERROR << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
                 }
+                else if (ESRV_RETCODE::SUCCESS != ClientAdd(/*&srv,*/ fd))
+                {
+                    LOG_ERROR << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
+                }
+
+                LOG_INFO << "Client Connected" << std::endl;
             }
-            if (isAccepted)
-                continue;
 
             if(events[i].events & EPOLLIN)
             {

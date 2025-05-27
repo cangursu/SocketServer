@@ -17,14 +17,8 @@ FdBaseUdp::FdBaseUdp()
 }
 
 
-FdBaseUdp::FdBaseUdp(uint16_t port)
-    : _port(port)
-{
-}
-
-
-FdBaseUdp::FdBaseUdp(uint16_t port, int fd)
-    : _fd (fd)
+FdBaseUdp::FdBaseUdp(const std::string &ip, uint16_t port)
+    : _ip(ip)
     , _port(port)
 {
 }
@@ -90,9 +84,12 @@ bool FdBaseUdp::Init()
 
 
     std::memset(&_addr, '\0', sizeof(_addr));
-    _addr.sin_family        = AF_INET;
-    _addr.sin_addr.s_addr   = htonl(INADDR_ANY);
-    _addr.sin_port          = htons(_port);
+    _addr.sin_family = AF_INET;
+    if (_ip.empty())
+        _addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    else
+        _addr.sin_addr.s_addr = inet_addr(_ip.data());
+    _addr.sin_port = htons(_port);
 
     return true;
 }

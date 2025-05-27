@@ -19,6 +19,11 @@ using FdBase = FdBaseUdp;
 #endif
 
 
+//#define DEFAULT_IP "127.0.0.1"
+#define DEFAULT_IP "20.160.49.75"   //Kurumsal3 New
+#define DEFAULT_PORT 19000
+
+
 class EchoClient
     : public SocketServer<EchoClient, FdBase, PThread>
 {
@@ -43,18 +48,18 @@ class EchoClient
 {
 }
         EchoClient()
-            : SocketServer<EchoClient, FdBase, PThread>("127.0.0.1", 8888)
+            : SocketServer<EchoClient, FdBase, PThread>(DEFAULT_IP, DEFAULT_PORT)
 {
 }
 
 #elif defined FDBASE_UDP
 
-        EchoClient(uint16_t port)
-            : SocketServer<EchoClient, FdBase, PThread>(port)
+        EchoClient(const char *ip, uint16_t port)
+            : SocketServer<EchoClient, FdBase, PThread>(ip, port)
 {
 }
         EchoClient()
-            : SocketServer<EchoClient, FdBase, PThread>(8888)
+            : SocketServer<EchoClient, FdBase, PThread>(DEFAULT_IP, DEFAULT_PORT)
 {
 }
 
