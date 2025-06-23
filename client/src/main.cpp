@@ -19,8 +19,8 @@ using FdBase = FdBaseUdp;
 #endif
 
 
-//#define DEFAULT_IP "127.0.0.1"
-#define DEFAULT_IP "20.160.49.75"   //Kurumsal3 New
+#define DEFAULT_IP "127.0.0.1"      //Local
+//#define DEFAULT_IP "20.160.49.75"   //Kurumsal3 New
 #define DEFAULT_PORT 19000
 
 
@@ -85,14 +85,49 @@ void EchoClient::OnPayload(FdBase &client, /*const*/ ::Payload &pack) /*const*/
 
 
 
-int main(int /*argc*/, const char * /*argv*/[])
+int main(int argc, const char *argv[])
 {
 #if defined FDBASE_UDS
+
     std::cout << "Unix Domain Socket Client V0.0 " << std::endl;
+
+    const char *key = "/tmp/socket";
+    if (argc > 1) {
+        key = argv[1];
+    }
+    EchoClient client(key);
+
+
 #elif defined FDBASE_TCP
+
     std::cout << "Hello TCP Socket Client V0.0 " << std::endl;
+
+    const char *ip   = DEFAULT_IP;
+    uint16_t    port = DEFAULT_PORT;
+
+    if (argc > 1) {
+        ip = argv[1];
+    }
+    if (argc > 2) {
+        port = std::atoi(argv[2]);
+    }
+    EchoClient client(ip, port);
+
 #elif defined FDBASE_UDP
+
     std::cout << "Hello UDP Socket Client V0.0 " << std::endl;
+
+    const char *ip   = DEFAULT_IP;
+    uint16_t    port = DEFAULT_PORT;
+
+    if (argc > 1) {
+        ip = argv[1];
+    }
+    if (argc > 2) {
+        port = std::atoi(argv[2]);
+    }
+    EchoClient client(ip, port);
+
 #else
     std::cout << "NO FdBase implemantaiton defined" << std::endl;
     return -1;
@@ -100,9 +135,7 @@ int main(int /*argc*/, const char * /*argv*/[])
 
 
 
-    ESRV_RETCODE rc = ESRV_RETCODE::NA;
-
-    EchoClient client;
+ESRV_RETCODE rc = ESRV_RETCODE::NA;
     if (ESRV_RETCODE::SUCCESS != (rc = client.InitClient()))
     {
         LOG_ERROR << "Unable to init Client" << std::endl;

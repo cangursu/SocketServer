@@ -122,8 +122,8 @@ bool FdBaseUdp::Send(uint8_t buff[], size_t len)
 
 ssize_t FdBaseUdp::Recv(uint8_t buff[], size_t len)
 {
-    socklen_t lenClientAddr = sizeof(_addrClient);
-    ssize_t res = recvfrom(_fd, buff, len, 0, (sockaddr *)&_addrClient, &lenClientAddr);
+    socklen_t lenClientAddr = sizeof(_addr);
+    ssize_t res = recvfrom(_fd, buff, len, 0, (sockaddr *)&_addr, &lenClientAddr);
     return res;
 }
 
