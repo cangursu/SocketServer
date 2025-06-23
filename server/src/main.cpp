@@ -30,11 +30,11 @@ class EchoServer
         ~EchoServer()   { SocketServer<EchoServer, FdBase, PThread>::Release();                                    }
 
 #if defined FDBASE_UDS
-        EchoServer() : SocketServer<EchoServer, FdBase, PThread>("/tmp/socket") {}
+        EchoServer(const char *key = "/tmp/socket") : SocketServer<EchoServer, FdBase, PThread>(key) {}
 #elif defined FDBASE_TCP
-        EchoServer() : SocketServer<EchoServer, FdBase, PThread>("", DEFAULT_PORT) {}
+        EchoServer(uint16_t port = DEFAULT_PORT) : SocketServer<EchoServer, FdBase, PThread>("", port) {}
 #elif defined FDBASE_UDP
-        EchoServer() : SocketServer<EchoServer, FdBase, PThread>("", DEFAULT_PORT) {}
+        EchoServer(uint16_t port = DEFAULT_PORT) : SocketServer<EchoServer, FdBase, PThread>("", port) {}
 #endif
 
         void            Release(bool doUnlink = false)                  { return SocketServer<EchoServer, FdBase, PThread>::Release(doUnlink);  }
@@ -94,14 +94,45 @@ CLI_RETCODE CmdStop(EchoServer &server, const char * /*cline*/)
 
 
 
-int main(int /*argc*/, const char * /*argv*/[])
+int main(int argc, const char *argv[])
 {
 #if defined FDBASE_UDS
+
     LOG_INFO << "Hello Unix Domain Socket Server V1.0" << std::endl;
+    const char *key = "/tmp/socket";
+    if (argc > 1) {
+        key = argv[1];
+    }
+    EchoServer server(key);
+
+
 #elif defined FDBASE_TCP
+
     LOG_INFO << "Hello TCP Socket Server V1.0" << std::endl;
+    uint16_t    port = DEFAULT_PORT;
+
+    if (argc > 1) {
+        port = std::atoi(argv[1]);
+        if (0 == port) {
+            port = DEFAULT_PORT;
+        }
+    }
+    EchoServer server(port);
+
+
 #elif defined FDBASE_UDP
+
     LOG_INFO << "Hello UDP Socket Server V1.0" << std::endl;
+    uint16_t    port = DEFAULT_PORT;
+    if (argc > 1) {
+        port = std::atoi(argv[1]);
+        if (0 == port) {
+            port = DEFAULT_PORT;
+        }
+    }
+    EchoServer server(port);
+
+
 #else
     LOG_INFO << "NO FdBase implemantaiton defined" << std::endl;
     return -1;
@@ -119,8 +150,6 @@ int main(int /*argc*/, const char * /*argv*/[])
 
 
     ESRV_RETCODE rc = ESRV_RETCODE::NA;
-    EchoServer server;
-
     if (ESRV_RETCODE::SUCCESS != (rc = server.InitServer()))
     {
         LOG_INFO << "Unabel to create Server" << std::endl;

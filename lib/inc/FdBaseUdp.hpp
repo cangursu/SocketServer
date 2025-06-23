@@ -42,7 +42,6 @@ private :
     std::string _ip;
     uint16_t    _port = 0;
     sockaddr_in _addr {};
-    sockaddr_in _addrClient {};
 };
 
 
