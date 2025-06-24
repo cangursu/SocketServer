@@ -41,8 +41,6 @@ class EchoServer
         ESRV_RETCODE    InitServer(/*const std::string &key*/)          { return SocketServer<EchoServer, FdBase, PThread>::InitServer();       }
         ESRV_RETCODE    Start()                                         { return SocketServer<EchoServer, FdBase, PThread>::Start();            }
         void            Stop()                                          { return SocketServer<EchoServer, FdBase, PThread>::Stop();             }
-        ESRV_RETCODE    SetListener()                                   { return SocketServer<EchoServer, FdBase, PThread>::SetListener();      }
-
 
         void OnPayload(FdBase &client, /*const*/ ::Payload &pack) /*const*/;
 };
@@ -156,14 +154,6 @@ int main(int argc, const char *argv[])
         LOG_INFO << "rc : " << to_string(rc) << ", errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
         return -1;
     }
-
-    if (ESRV_RETCODE::SUCCESS != (rc = server.SetListener(/*0,*/ /*&server*/)))
-    {
-        LOG_INFO << "Unabel to add listener" << std::endl;
-        LOG_INFO << "rc : " << to_string(rc) << ", errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
-        return -1;
-    }
-
 
     CmdStart(server, "");
 

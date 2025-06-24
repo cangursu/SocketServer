@@ -176,6 +176,8 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::InitServer()
     _fdEpoll.Fd(epoll_create1(0));
     if (false  == _fdEpoll.IsValid())
         rc = ESRV_RETCODE::ERROR_EPOLL;
+    if (ESRV_RETCODE::SUCCESS == rc)
+        rc = SetListener();
     return rc;
 }
 
