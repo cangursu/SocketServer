@@ -36,6 +36,10 @@ public:
     void    Close();
     void    DeleteKey();
 
+    bool    operator == (const FdBaseTcp &fd);
+    bool    operator != (const FdBaseTcp &fd);
+
+
 private :
 
     int         _fd = FD_INVALID;
@@ -44,6 +48,18 @@ private :
     sockaddr_in _addr {};
 
 };
+
+
+
+inline
+bool FdBaseTcp::operator == (const FdBaseTcp &fd) {
+    return fd._fd == _fd;
+}
+
+inline
+bool FdBaseTcp::operator != (const FdBaseTcp &fd) {
+    return !operator == (fd);
+}
 
 
 

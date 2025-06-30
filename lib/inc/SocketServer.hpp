@@ -32,20 +32,22 @@
 
 enum class ESRV_RETCODE
 {
-    NA              =   1,
-    SUCCESS         =   0,
-    ERROR_SOCKET    = - 1,
-    ERROR_BIND      = - 2,
-    ERROR_LISTEN    = - 3,
-    ERROR_ACCEPT    = - 4,
-    ERROR_CONNECT   = - 5,
-    ERROR_SEND      = - 6,
-    ERROR_RECV      = - 7,
-    ERROR_PACKET    = - 8,
-    ERROR_PARAMETER = - 9,
-    ERROR_PTHREAD   = -40,
-    ERROR_EPOLL     = -50,
-    ERROR_EPOLLWAIT = -51,
+    NA                  =   1,
+    SUCCESS             =   0,
+    ERROR_SOCKET        = - 1,
+    ERROR_BIND          = - 2,
+    ERROR_LISTEN        = - 3,
+    ERROR_ACCEPT        = - 4,
+    ERROR_NOT_CON       = - 5,
+    ERROR_CONNECT       = - 6,
+    ERROR_SEND          = - 7,
+    ERROR_RECV          = - 8,
+    ERROR_PACKET        = - 9,
+    ERROR_PARAMETER     = -10,
+    ERROR_EXIST         = -11,
+    ERROR_PTHREAD       = -50,
+    ERROR_EPOLL         = -60,
+    ERROR_EPOLLWAIT     = -61,
 };
 
 
@@ -291,14 +293,18 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::ClientAdd(const TFdBaseS
     if (!_fdEpoll.IsValid())
         return ESRV_RETCODE::ERROR_EPOLL;
 
+    if (_fdSock == fd)
+        return ESRV_RETCODE::ERROR_EXIST;
+
     epoll_event event {};
     event.events = EPOLLIN /*|EPOLLRDHUP|EPOLLHUP*/;
     event.data.fd = fd.Fd();
-    int ret = epoll_ctl(_fdEpoll.Fd(), EPOLL_CTL_ADD, fd.Fd(), &event);
-    if (0 != ret)
-        return ESRV_RETCODE::ERROR_EPOLL;
 
-//    _mapClientFd[fd.Fd()] = srv;
+    int ret = epoll_ctl(_fdEpoll.Fd(), EPOLL_CTL_ADD, fd.Fd(), &event);
+    if (0 != ret) {
+        return ESRV_RETCODE::ERROR_EPOLL;
+    }
+
     return ESRV_RETCODE::SUCCESS;
 }
 
@@ -312,7 +318,6 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::ClientRemove(int fd)
     ESRV_RETCODE ret = (0 == epoll_ctl(_fdEpoll.Fd(), EPOLL_CTL_DEL, fd, NULL)) ? ESRV_RETCODE::SUCCESS : ESRV_RETCODE::ERROR_EPOLL;
     ::close(fd);
 
-//    _mapClientFd.erase(fd);
     return ret;
 }
 
@@ -352,27 +357,34 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Wait()
 //            LOG_DEBUG <<  "epoll_event : \n" << ::to_string(events[i]) << std::endl;
 
             TFdBaseSock *sock = &_fdSock;
-            if (sock && (events[i].data.fd == /*srv._pSock*/sock->Fd()))
+            if (sock && (events[i].data.fd == sock->Fd()))
             {
                 TFdBaseSock fd;
-                if (ESRV_RETCODE::SUCCESS != ClientAccept(sock/*srv._pSock*/, fd))
-                {
-                    LOG_ERROR << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
+                ESRV_RETCODE rc = ClientAccept(sock, fd);
+                if (ESRV_RETCODE::SUCCESS != rc) {
+                    LOG_ERROR << "ClientAccept - errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
+                } else {
+                    rc = ClientAdd(fd);
+                    switch (rc) {
+                        case ESRV_RETCODE::SUCCESS :
+                            LOG_INFO << "Client Connected" << std::endl;
+                            break;
+                        case ESRV_RETCODE::ERROR_EXIST :
+                            break;
+                        default:
+                            LOG_ERROR << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
+                            break;
+                    }
                 }
-                else if (ESRV_RETCODE::SUCCESS != ClientAdd(/*&srv,*/ fd))
-                {
-                    LOG_ERROR << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
-                }
-
-                LOG_INFO << "Client Connected" << std::endl;
             }
 
             if(events[i].events & EPOLLIN)
             {
                 Payload packet;
                 ESRV_RETCODE err = Recv(packet, events[i].data.fd);
-//                LOG_DEBUG << "SocketServer::Wait - Recv : " << std::endl;
+//                LOG_DEBUG << "SocketServer::Wait - Recv : (" << to_string(err) << ", " << ErrnoText(errno) << ") " << std::endl;
 //                LOG_DEBUG << to_string(packet)  << std::endl;
+
 
                 switch(err)
                 {
@@ -384,6 +396,9 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Wait()
                     case ESRV_RETCODE::ERROR_RECV:
                         ClientRemove({events[i].data.fd});
                         LOG_INFO << "Client Disconnecting : " << ::to_string(err) << std::endl;
+                        break;
+
+                    case ESRV_RETCODE::ERROR_NOT_CON:
                         break;
 
                     default:
@@ -411,7 +426,7 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Send(TFdBaseSock *client
     if (lenPacket < 1)
         return ESRV_RETCODE::ERROR_PACKET;
 
-    return client->/*TFdBaseSock::*/Send(packet, lenPacket) ? ESRV_RETCODE::SUCCESS : ESRV_RETCODE::ERROR_SEND;
+    return client->Send(packet, lenPacket) ? ESRV_RETCODE::SUCCESS : ESRV_RETCODE::ERROR_SEND;
 }
 
 
@@ -425,8 +440,13 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Recv(Payload &packet, in
     uint8_t buff[lenBuff];
     ssize_t lenRecv = fdObj.TFdBaseSock::Recv(buff, lenBuff);
 
-    if (-1 == lenRecv)
-        return ESRV_RETCODE::ERROR_RECV;
+    if (-1 == lenRecv) {
+        if (ENOTCONN == errno ) {
+            return ESRV_RETCODE::ERROR_NOT_CON;
+        } else {
+            return ESRV_RETCODE::ERROR_RECV;
+        }
+    }
     if (0 == lenRecv)
         return ESRV_RETCODE::ERROR_CONNECT;
 

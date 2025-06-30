@@ -37,18 +37,18 @@ class EchoServer
         EchoServer(uint16_t port = DEFAULT_PORT) : SocketServer<EchoServer, FdBase, PThread>("", port) {}
 #endif
 
-        void            Release(bool doUnlink = false)                  { return SocketServer<EchoServer, FdBase, PThread>::Release(doUnlink);  }
-        ESRV_RETCODE    InitServer(/*const std::string &key*/)          { return SocketServer<EchoServer, FdBase, PThread>::InitServer();       }
-        ESRV_RETCODE    Start()                                         { return SocketServer<EchoServer, FdBase, PThread>::Start();            }
-        void            Stop()                                          { return SocketServer<EchoServer, FdBase, PThread>::Stop();             }
+        void            Release(bool doUnlink = false)  { return SocketServer<EchoServer, FdBase, PThread>::Release(doUnlink);  }
+        ESRV_RETCODE    InitServer()                    { return SocketServer<EchoServer, FdBase, PThread>::InitServer();       }
+        ESRV_RETCODE    Start()                         { return SocketServer<EchoServer, FdBase, PThread>::Start();            }
+        void            Stop()                          { return SocketServer<EchoServer, FdBase, PThread>::Stop();             }
 
         void OnPayload(FdBase &client, /*const*/ ::Payload &pack) /*const*/;
 };
 
 void EchoServer::OnPayload(FdBase &client, /*const*/ ::Payload &packet) /*const*/
 {
-    LOG_INFO   << "EchoServer::Payload Packet (" << client.Fd() << ") : " << std::endl;
-    LOG_INFO   << to_string(packet)  << std::endl;
+    LOG_INFO    << "EchoServer::Payload Packet (" << client.Fd() << ") : "
+                << to_string(packet)  << std::endl;
 
     SocketServer<EchoServer, FdBase, PThread>::Send(&client, packet._packet, packet._len);
 }
@@ -107,7 +107,7 @@ int main(int argc, const char *argv[])
 #elif defined FDBASE_TCP
 
     LOG_INFO << "Hello TCP Socket Server V1.0" << std::endl;
-    uint16_t    port = DEFAULT_PORT;
+    uint16_t port = DEFAULT_PORT;
 
     if (argc > 1) {
         port = std::atoi(argv[1]);

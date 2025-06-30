@@ -78,7 +78,8 @@ void EchoClient::OnPayload(FdBase &client, /*const*/ ::Payload &pack) /*const*/
 {
 //    LOG_INFO << __PRETTY_FUNCTION__  << " : " << std::endl;
     pack._packet[pack._len] = '\0'; // Null-terminate the string
-    LOG_INFO << "Received from remote (" << client.Fd() << ") : " << (char*)pack._packet << std::endl;
+    LOG_INFO << "Received from remote (" << client.Fd() << ") : "
+             << (char*)pack._packet << "  (" << pack._len << ")" << std::endl;
 }
 
 
@@ -169,8 +170,8 @@ ESRV_RETCODE rc = ESRV_RETCODE::NA;
         }
         else {
             Payload packet;
-            ESRV_RETCODE err = client.Recv(packet, client.Sock().Fd());
-            LOG_DEBUG << "Recv : " << std::string(reinterpret_cast<const char*>(packet._packet), packet._len) << ", " << ::to_string(err) << ") : " << std::endl;
+            /*ESRV_RETCODE err = */client.Recv(packet, client.Sock().Fd());
+//            LOG_DEBUG << "Recv : " << std::string(reinterpret_cast<const char*>(packet._packet), packet._len) << ", " << ::to_string(err) << " : " << std::endl;
         }
 
         sleep(1);
