@@ -35,6 +35,9 @@ public:
     void    Close();
     void    DeleteKey();
 
+    bool    operator == (const FdBaseUds &fd);
+    bool    operator != (const FdBaseUds &fd);
+
 private :
 
     int         _fd = FD_INVALID;
@@ -42,6 +45,19 @@ private :
     sockaddr_un _addr {};
 
 };
+
+
+
+inline
+bool FdBaseUds::operator == (const FdBaseUds &fd) {
+    return fd._fd == _fd;
+}
+
+
+inline
+bool FdBaseUds::operator != (const FdBaseUds &fd) {
+    return !operator == (fd);
+}
 
 
 
