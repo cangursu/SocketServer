@@ -13,20 +13,36 @@ FdBaseUds::FdBaseUds()
 {
 }
 
+
 FdBaseUds::FdBaseUds(const std::string &key)
     : _key(key)
 {
 }
+
 
 int FdBaseUds::Fd() const
 {
     return _fd;
 }
 
+
 void FdBaseUds::Fd(int fd)
 {
     _fd = fd;
 }
+
+
+sockaddr_un FdBaseUds::Addr() const
+{
+    return _addr;
+}
+
+
+void FdBaseUds::Addr(const sockaddr_un &addr)
+{
+    _addr = addr;
+}
+
 
 bool FdBaseUds::IsValid() const
 {

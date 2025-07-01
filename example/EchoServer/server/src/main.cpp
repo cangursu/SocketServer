@@ -47,8 +47,13 @@ class EchoServer
 
 void EchoServer::OnPayload(FdBase &client, /*const*/ ::Payload &packet) /*const*/
 {
-    LOG_INFO    << "EchoServer::Payload Packet (" << client.Fd() << ") : "
-                << to_string(packet)  << std::endl;
+    LOG_INFO << "EchoServer::Payload Packet (" << client.Fd() << ", "
+#if (defined FDBASE_TCP) || (defined FDBASE_UDP)
+            << client.Addr().sin_port <<  ":" << client.Addr().sin_addr.s_addr
+#elif defined FDBASE_UDS
+            << client.Addr().sun_path
+#endif //FDBASE_TCP, FDBASE_UDP
+            << ") : " << to_string(packet)  << std::endl;
 
     SocketServer<EchoServer, FdBase, PThread>::Send(&client, packet._packet, packet._len);
 }

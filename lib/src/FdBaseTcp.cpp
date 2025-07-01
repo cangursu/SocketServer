@@ -37,9 +37,22 @@ int FdBaseTcp::Fd() const
     return _fd;
 }
 
+
 void FdBaseTcp::Fd(int fd)
 {
     _fd = fd;
+}
+
+
+sockaddr_in FdBaseTcp::Addr() const
+{
+    return _addr;
+}
+
+
+void FdBaseTcp::Addr(const sockaddr_in &addr)
+{
+    _addr = addr;
 }
 
 
@@ -48,10 +61,12 @@ bool FdBaseTcp::IsValid() const
     return (FD_INVALID != _fd);
 }
 
+
 void FdBaseTcp::DeleteKey()
 {
     //unlink(_key.data());
 }
+
 
 void FdBaseTcp::Close()
 {
@@ -83,6 +98,7 @@ bool FdBaseTcp::Init()
 
     return true;
 }
+
 
 bool FdBaseTcp::Accept(FdBaseTcp &fd)
 {

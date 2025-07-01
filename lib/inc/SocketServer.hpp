@@ -436,7 +436,7 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Recv(Payload &packet, in
     TFdBaseSock fdObj;
     fdObj.Fd(fd);
 
-    constexpr size_t lenBuff = 20*1012;
+    constexpr size_t lenBuff = 20*1024;
     uint8_t buff[lenBuff];
     ssize_t lenRecv = fdObj.TFdBaseSock::Recv(buff, lenBuff);
 

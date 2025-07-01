@@ -34,7 +34,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/SocketServerTCP",
-            "args": ["12312"],
+            "_xxx_args": ["12312"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

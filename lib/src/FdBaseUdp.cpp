@@ -36,6 +36,18 @@ void FdBaseUdp::Fd(int fd)
 }
 
 
+sockaddr_in FdBaseUdp::Addr() const
+{
+    return _addr;
+}
+
+
+void FdBaseUdp::Addr(const sockaddr_in &addr)
+{
+    _addr = addr;
+}
+
+
 bool FdBaseUdp::IsValid() const
 {
     return (FD_INVALID != _fd);

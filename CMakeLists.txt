@@ -15,7 +15,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 add_subdirectory(lib)
-add_subdirectory(server)
-add_subdirectory(client)
+add_subdirectory(example/EchoServer/server)
+add_subdirectory(example/EchoServer/client)
 
 

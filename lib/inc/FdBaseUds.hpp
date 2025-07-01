@@ -22,7 +22,10 @@ public:
     FdBaseUds(const std::string &key);
 
     int     Fd() const;
-    void    Fd(int fd) ;
+    void    Fd(int fd);
+
+    sockaddr_un Addr() const;
+    void        Addr(const sockaddr_un &addr) ;
 
     bool    Init();
     bool    Accept(FdBaseUds &fd);

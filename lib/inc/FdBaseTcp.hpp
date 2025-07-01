@@ -25,6 +25,9 @@ public:
     int     Fd() const;
     void    Fd(int fd) ;
 
+    sockaddr_in Addr() const;
+    void        Addr(const sockaddr_in &addr) ;
+
     bool    Init();
     bool    Accept(FdBaseTcp &fd);
     bool    Connect();

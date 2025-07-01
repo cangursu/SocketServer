@@ -213,8 +213,7 @@ std::string to_string(ESRV_RETCODE val)
 
 void to_string(const ::Payload &pck, std::ostringstream &ss)
 {
-    ss  << "len : "      << pck._len    << ", "
-        << "payload : " << pck._packet;
+    ss  << "len : " << pck._len  << ", " << "payload : " << pck._packet;
 }
 
 
@@ -225,6 +224,3 @@ std::string to_string(const ::Payload &pck)
     to_string(pck, ss);
     return ss.str();
 }
-
-
-

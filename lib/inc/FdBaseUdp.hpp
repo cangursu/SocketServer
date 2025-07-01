@@ -23,7 +23,10 @@ public:
     FdBaseUdp(const std::string &ip, uint16_t port);
 
     int     Fd() const;
-    void    Fd(int fd) ;
+    void    Fd(int fd);
+
+    sockaddr_in Addr() const;
+    void        Addr(const sockaddr_in &addr) ;
 
     bool    Init();
     bool    Accept(FdBaseUdp &fd);
