@@ -3,7 +3,6 @@
 #include "FdBaseUds.hpp"
 #include "FdBaseTcp.hpp"
 #include "FdBaseUdp.hpp"
-#include "PThread.hpp"
 #include "cli.h"
 
 #include <iostream>
@@ -24,23 +23,23 @@ using FdBase = FdBaseUdp;
 
 
 class EchoServer
-    : public SocketServer<EchoServer, FdBase, PThread>
+    : public SocketServer<EchoServer, FdBase>
 {
     public :
-        ~EchoServer()   { SocketServer<EchoServer, FdBase, PThread>::Release();                                    }
+        ~EchoServer()   { SocketServer<EchoServer, FdBase>::Release();                                    }
 
 #if defined FDBASE_UDS
-        EchoServer(const char *key = "/tmp/socket") : SocketServer<EchoServer, FdBase, PThread>(key) {}
+        EchoServer(const char *key = "/tmp/socket") : SocketServer<EchoServer, FdBase>(key) {}
 #elif defined FDBASE_TCP
-        EchoServer(uint16_t port = DEFAULT_PORT) : SocketServer<EchoServer, FdBase, PThread>("", port) {}
+        EchoServer(uint16_t port = DEFAULT_PORT) : SocketServer<EchoServer, FdBase>("", port) {}
 #elif defined FDBASE_UDP
-        EchoServer(uint16_t port = DEFAULT_PORT) : SocketServer<EchoServer, FdBase, PThread>("", port) {}
+        EchoServer(uint16_t port = DEFAULT_PORT) : SocketServer<EchoServer, FdBase>("", port) {}
 #endif
 
-        void            Release(bool doUnlink = false)  { return SocketServer<EchoServer, FdBase, PThread>::Release(doUnlink);  }
-        ESRV_RETCODE    InitServer()                    { return SocketServer<EchoServer, FdBase, PThread>::InitServer();       }
-        ESRV_RETCODE    Start()                         { return SocketServer<EchoServer, FdBase, PThread>::Start();            }
-        void            Stop()                          { return SocketServer<EchoServer, FdBase, PThread>::Stop();             }
+        void            Release(bool doUnlink = false)  { return SocketServer<EchoServer, FdBase>::Release(doUnlink);  }
+        ESRV_RETCODE    InitServer()                    { return SocketServer<EchoServer, FdBase>::InitServer();       }
+        ESRV_RETCODE    Start()                         { return SocketServer<EchoServer, FdBase>::Start();            }
+        void            Stop()                          { return SocketServer<EchoServer, FdBase>::Stop();             }
 
         void OnPayload(FdBase &client, /*const*/ ::Payload &pack) /*const*/;
 };
@@ -55,7 +54,7 @@ void EchoServer::OnPayload(FdBase &client, /*const*/ ::Payload &packet) /*const*
 #endif //FDBASE_TCP, FDBASE_UDP
             << ") : " << to_string(packet)  << std::endl;
 
-    SocketServer<EchoServer, FdBase, PThread>::Send(&client, packet._packet, packet._len);
+    SocketServer<EchoServer, FdBase>::Send(&client, packet._packet, packet._len);
 }
 
 

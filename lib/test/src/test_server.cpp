@@ -1,7 +1,6 @@
 
 #include "SocketServer.hpp"
 #include "FdBaseUds.hpp"
-#include "PThread.hpp"
 
 #include <gtest/gtest.h>
 #include <string>
@@ -9,16 +8,16 @@
 
 
 class UdsTestServer
-    : public SocketServer<UdsTestServer, FdBaseUds, PThread>
+    : public SocketServer<UdsTestServer, FdBaseUds>
 {
     public :
         UdsTestServer(const std::string &key)
-            : SocketServer<UdsTestServer, FdBaseUds, PThread>(key)
+            : SocketServer<UdsTestServer, FdBaseUds>(key)
         {
         }
 
-        ESRV_RETCODE InitClient()                       { return SocketServer<UdsTestServer, FdBaseUds, PThread>::InitClient();   }
-        ESRV_RETCODE Send(uint8_t *data, uint16_t len)  { return SocketServer<UdsTestServer, FdBaseUds, PThread>::Send(&Sock(), data, len);    }
+        ESRV_RETCODE InitClient()                       { return SocketServer<UdsTestServer, FdBaseUds>::InitClient();   }
+        ESRV_RETCODE Send(uint8_t *data, uint16_t len)  { return SocketServer<UdsTestServer, FdBaseUds>::Send(&Sock(), data, len);    }
 
         void OnPayload(FdBaseUds &client, ::Payload &);
         uint64_t _data = 0;

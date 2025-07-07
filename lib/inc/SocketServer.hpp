@@ -2,7 +2,8 @@
 #ifndef __SOCKET_SERVER_H__
 #define __SOCKET_SERVER_H__
 
-#include <CRTPBase.hpp>
+#include "CRTPBase.hpp"
+#include "PThread.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -89,9 +90,9 @@ std::string to_string(const ::Payload &pck);
  *
 */
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
+template <typename TImpl, typename TFdBaseSock>
 class SocketServer
-    : public TThread
+    : public PThread<SocketServer<TImpl, TFdBaseSock>>
     , public CRTPBase<TImpl>
 {
     public:
@@ -116,7 +117,7 @@ class SocketServer
         ESRV_RETCODE   SetListener();
 
         // Form TThread
-        virtual void Run() override;
+        void Run();
 
         ESRV_RETCODE    ConnectClient();
         ESRV_RETCODE    Reconnect();
@@ -144,8 +145,8 @@ class SocketServer
 };
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-void SocketServer<TImpl, TFdBaseSock, TThread>::Release(bool doUnlink /*= false*/)
+template <typename TImpl, typename TFdBaseSock>
+void SocketServer<TImpl, TFdBaseSock>::Release(bool doUnlink /*= false*/)
 {
     _fdEpoll.Close();
     _fdSock.Close();
@@ -154,23 +155,23 @@ void SocketServer<TImpl, TFdBaseSock, TThread>::Release(bool doUnlink /*= false*
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::SetListener()
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::SetListener()
 {
     return _fdSock.Init() ? ESRV_RETCODE::SUCCESS : ESRV_RETCODE::ERROR_SOCKET;
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::InitClient()
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::InitClient()
 {
     Release(false);
     return SetListener();
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::InitServer()
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::InitServer()
 {
     Release(true);
 
@@ -184,15 +185,15 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::InitServer()
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::ConnectClient()
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::ConnectClient()
 {
     return _fdSock.Connect() ? ESRV_RETCODE::SUCCESS : ESRV_RETCODE::ERROR_CONNECT;
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Reconnect()
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Reconnect()
 {
     ESRV_RETCODE rc = ESRV_RETCODE::ERROR_CONNECT;
     while (ESRV_RETCODE::SUCCESS != (rc = ConnectClient()))
@@ -214,10 +215,10 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Reconnect()
 
 
 // Form TThread
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-void SocketServer<TImpl, TFdBaseSock, TThread>::Run()
+template <typename TImpl, typename TFdBaseSock>
+void SocketServer<TImpl, TFdBaseSock>::Run()
 {
-    if (ESRV_RETCODE::SUCCESS != SocketServer<TImpl, TFdBaseSock, TThread>::Wait())
+    if (ESRV_RETCODE::SUCCESS != SocketServer<TImpl, TFdBaseSock>::Wait())
     {
         LOG_ERROR << "Unabel to Wait" << std::endl;
         LOG_ERROR << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
@@ -226,8 +227,8 @@ void SocketServer<TImpl, TFdBaseSock, TThread>::Run()
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Start()
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Start()
 {
     if (false == _fdEpoll.IsValid())
         return ESRV_RETCODE::ERROR_EPOLL;
@@ -262,20 +263,20 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Start()
         LOG_ERROR << "No Client to add listeners. Server not started" << std::endl;
         return ESRV_RETCODE::ERROR_EPOLL;
     }
-    return  (0 == TThread::Create("SocketServer")) ? ESRV_RETCODE::SUCCESS : ESRV_RETCODE::ERROR_PTHREAD;
+    return  (0 == PThread<SocketServer<TImpl, TFdBaseSock>>::Create("SocketServer")) ? ESRV_RETCODE::SUCCESS : ESRV_RETCODE::ERROR_PTHREAD;
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-void SocketServer<TImpl, TFdBaseSock, TThread>::Stop()
+template <typename TImpl, typename TFdBaseSock>
+void SocketServer<TImpl, TFdBaseSock>::Stop()
 {
     _doExit = true;
-    TThread::Join();
+    PThread<SocketServer<TImpl, TFdBaseSock>>::Join();
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::ClientAccept(TFdBaseSock *fdListen, TFdBaseSock &fd)
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::ClientAccept(TFdBaseSock *fdListen, TFdBaseSock &fd)
 {
     if (nullptr == fdListen)
         return ESRV_RETCODE::ERROR_PARAMETER;
@@ -284,8 +285,8 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::ClientAccept(TFdBaseSock
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::ClientAdd(const TFdBaseSock &fd)
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::ClientAdd(const TFdBaseSock &fd)
 {
     if (!fd.IsValid())
         return ESRV_RETCODE::ERROR_SOCKET;
@@ -309,8 +310,8 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::ClientAdd(const TFdBaseS
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::ClientRemove(int fd)
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::ClientRemove(int fd)
 {
     if (!_fdEpoll.IsValid())
         return ESRV_RETCODE::ERROR_EPOLL;
@@ -322,8 +323,8 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::ClientRemove(int fd)
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Wait()
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Wait()
 {
     LOG_INFO << "Entering SocketServer Recv loop" << std::endl;
     constexpr int maxevents = 10;
@@ -418,8 +419,8 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Wait()
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Send(TFdBaseSock *client, uint8_t *payload, uint16_t lenPayload)
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Send(TFdBaseSock *client, uint8_t *payload, uint16_t lenPayload)
 {
     uint8_t packet[_lenMaxPacket] {};
     ssize_t lenPacket = PacketCreate(packet, _lenMaxPacket, payload, lenPayload);
@@ -430,8 +431,8 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Send(TFdBaseSock *client
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Recv(Payload &packet, int fd)
+template <typename TImpl, typename TFdBaseSock>
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Recv(Payload &packet, int fd)
 {
     TFdBaseSock fdObj;
     fdObj.Fd(fd);
@@ -465,8 +466,8 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock, TThread>::Recv(Payload &packet, in
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ssize_t SocketServer<TImpl, TFdBaseSock, TThread>::PacketParse(Payload &packet, const uint8_t buff[], const ssize_t lenBuff)
+template <typename TImpl, typename TFdBaseSock>
+ssize_t SocketServer<TImpl, TFdBaseSock>::PacketParse(Payload &packet, const uint8_t buff[], const ssize_t lenBuff)
 {
     enum class PARSE_STATE
     {
@@ -580,8 +581,8 @@ ssize_t SocketServer<TImpl, TFdBaseSock, TThread>::PacketParse(Payload &packet, 
 }
 
 
-template <typename TImpl, typename TFdBaseSock, typename TThread>
-ssize_t  SocketServer<TImpl, TFdBaseSock, TThread>::PacketCreate(uint8_t packet[], const ssize_t lenPacket, const uint8_t payload[], const uint16_t lenPayload)
+template <typename TImpl, typename TFdBaseSock>
+ssize_t  SocketServer<TImpl, TFdBaseSock>::PacketCreate(uint8_t packet[], const ssize_t lenPacket, const uint8_t payload[], const uint16_t lenPayload)
 {
     if (lenPacket > (ssize_t)_lenMaxPacket)
         return -1;

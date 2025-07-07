@@ -3,7 +3,7 @@
 #include "FdBaseUds.hpp"
 #include "FdBaseTcp.hpp"
 #include "FdBaseUdp.hpp"
-#include "PThread.hpp"
+
 
 #include <iostream>
 
@@ -25,7 +25,7 @@ using FdBase = FdBaseUdp;
 
 
 class EchoClient
-    : public SocketServer<EchoClient, FdBase, PThread>
+    : public SocketServer<EchoClient, FdBase>
 {
     public :
         ~EchoClient()  = default;
@@ -33,43 +33,43 @@ class EchoClient
 #if defined FDBASE_UDS
 
         EchoClient(const char *key)
-            : SocketServer<EchoClient, FdBase, PThread>(key)
+            : SocketServer<EchoClient, FdBase>(key)
 {
 }
         EchoClient()
-            : SocketServer<EchoClient, FdBase, PThread>("/tmp/socket")
+            : SocketServer<EchoClient, FdBase>("/tmp/socket")
 {
 }
 
 #elif defined FDBASE_TCP
 
         EchoClient(const char *ip, uint16_t port)
-            : SocketServer<EchoClient, FdBase, PThread>(ip, port)
+            : SocketServer<EchoClient, FdBase>(ip, port)
 {
 }
         EchoClient()
-            : SocketServer<EchoClient, FdBase, PThread>(DEFAULT_IP, DEFAULT_PORT)
+            : SocketServer<EchoClient, FdBase>(DEFAULT_IP, DEFAULT_PORT)
 {
 }
 
 #elif defined FDBASE_UDP
 
         EchoClient(const char *ip, uint16_t port)
-            : SocketServer<EchoClient, FdBase, PThread>(ip, port)
+            : SocketServer<EchoClient, FdBase>(ip, port)
 {
 }
         EchoClient()
-            : SocketServer<EchoClient, FdBase, PThread>(DEFAULT_IP, DEFAULT_PORT)
+            : SocketServer<EchoClient, FdBase>(DEFAULT_IP, DEFAULT_PORT)
 {
 }
 
 #endif
 
-        void            Release(bool doUnlink = false)          { return SocketServer<EchoClient, FdBase, PThread>::Release(doUnlink);              }
-        ESRV_RETCODE    InitClient()                            { return SocketServer<EchoClient, FdBase, PThread>::InitClient();                   }
-        ESRV_RETCODE    Connect()                               { return SocketServer<EchoClient, FdBase, PThread>::ConnectClient();                }
-        ESRV_RETCODE    Reconnect()                             { return SocketServer<EchoClient, FdBase, PThread>::Reconnect();                    }
-        ESRV_RETCODE    Send(uint8_t *payload, uint16_t len)    { return SocketServer<EchoClient, FdBase, PThread>::Send(&Sock() , payload, len);   }
+        void            Release(bool doUnlink = false)          { return SocketServer<EchoClient, FdBase>::Release(doUnlink);              }
+        ESRV_RETCODE    InitClient()                            { return SocketServer<EchoClient, FdBase>::InitClient();                   }
+        ESRV_RETCODE    Connect()                               { return SocketServer<EchoClient, FdBase>::ConnectClient();                }
+        ESRV_RETCODE    Reconnect()                             { return SocketServer<EchoClient, FdBase>::Reconnect();                    }
+        ESRV_RETCODE    Send(uint8_t *payload, uint16_t len)    { return SocketServer<EchoClient, FdBase>::Send(&Sock() , payload, len);   }
 
         void OnPayload(FdBase &client, /*const*/ ::Payload &pack) /*const*/;
 };
