@@ -65,11 +65,8 @@ class EchoClient
 
 #endif
 
-        void            Release(bool doUnlink = false)          { return SocketServer<EchoClient, FdBase>::Release(doUnlink);              }
-        ESRV_RETCODE    InitClient()                            { return SocketServer<EchoClient, FdBase>::InitClient();                   }
-        ESRV_RETCODE    Connect()                               { return SocketServer<EchoClient, FdBase>::ConnectClient();                }
-        ESRV_RETCODE    Reconnect()                             { return SocketServer<EchoClient, FdBase>::Reconnect();                    }
-        ESRV_RETCODE    Send(uint8_t *payload, uint16_t len)    { return SocketServer<EchoClient, FdBase>::Send(&Sock() , payload, len);   }
+        ESRV_RETCODE    Send(uint8_t *payload, uint16_t len)
+            { return SocketServer<EchoClient, FdBase>::Send(&Sock() , payload, len);   }
 
         void OnPayload(FdBase &client, /*const*/ ::Payload &pack) /*const*/;
 };
@@ -136,7 +133,7 @@ int main(int argc, const char *argv[])
 
 
 
-ESRV_RETCODE rc = ESRV_RETCODE::NA;
+    ESRV_RETCODE rc = ESRV_RETCODE::NA;
     if (ESRV_RETCODE::SUCCESS != (rc = client.InitClient()))
     {
         LOG_ERROR << "Unable to init Client" << std::endl;

@@ -36,11 +36,6 @@ class EchoServer
         EchoServer(uint16_t port = DEFAULT_PORT) : SocketServer<EchoServer, FdBase>("", port) {}
 #endif
 
-        void            Release(bool doUnlink = false)  { return SocketServer<EchoServer, FdBase>::Release(doUnlink);  }
-        ESRV_RETCODE    InitServer()                    { return SocketServer<EchoServer, FdBase>::InitServer();       }
-        ESRV_RETCODE    Start()                         { return SocketServer<EchoServer, FdBase>::Start();            }
-        void            Stop()                          { return SocketServer<EchoServer, FdBase>::Stop();             }
-
         void OnPayload(FdBase &client, /*const*/ ::Payload &pack) /*const*/;
 };
 

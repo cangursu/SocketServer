@@ -43,7 +43,7 @@ TEST(SocketServerLib, Test)
 
     UdsTestServer client(key);
     EXPECT_EQ(ESRV_RETCODE::SUCCESS,    client.InitClient());
-    EXPECT_EQ(ESRV_RETCODE::SUCCESS,    client.ConnectClient());
+    EXPECT_EQ(ESRV_RETCODE::SUCCESS,    client.Connect());
 
 
     uint64_t count = 1000;
@@ -140,11 +140,11 @@ class UdsTestServer_Src2
 //
 //      UdsTestServer client1(key1);
 //      EXPECT_EQ(ESRV_RETCODE::SUCCESS,  client1.InitClient());
-//      EXPECT_EQ(ESRV_RETCODE::SUCCESS,  client1.ConnectClient());
+//      EXPECT_EQ(ESRV_RETCODE::SUCCESS,  client1.Connect());
 //
 //      UdsTestServer client2(key2);
 //      EXPECT_EQ(ESRV_RETCODE::SUCCESS,  client2.InitClient());
-//      EXPECT_EQ(ESRV_RETCODE::SUCCESS,  client2.ConnectClient());
+//      EXPECT_EQ(ESRV_RETCODE::SUCCESS,  client2.Connect());
 //
 //      uint8_t data1 = 0xa7;
 //      uint8_t data2 = 0x29;

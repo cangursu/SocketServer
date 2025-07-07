@@ -119,7 +119,7 @@ class SocketServer
         // Form TThread
         void Run();
 
-        ESRV_RETCODE    ConnectClient();
+        ESRV_RETCODE    Connect();
         ESRV_RETCODE    Reconnect();
         ESRV_RETCODE    Recv(Payload &packet, int fd);
         ESRV_RETCODE    Send(TFdBaseSock *client, uint8_t *payload, uint16_t lenPayload);
@@ -186,7 +186,7 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::InitServer()
 
 
 template <typename TImpl, typename TFdBaseSock>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::ConnectClient()
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Connect()
 {
     return _fdSock.Connect() ? ESRV_RETCODE::SUCCESS : ESRV_RETCODE::ERROR_CONNECT;
 }
@@ -196,7 +196,7 @@ template <typename TImpl, typename TFdBaseSock>
 ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Reconnect()
 {
     ESRV_RETCODE rc = ESRV_RETCODE::ERROR_CONNECT;
-    while (ESRV_RETCODE::SUCCESS != (rc = ConnectClient()))
+    while (ESRV_RETCODE::SUCCESS != (rc = Connect()))
     {
         LOG_ERROR << "Unabel to connect" << std::endl;
         LOG_ERROR << "errno : " << ErrnoText(errno) << ", " << errno <<  std::endl;
