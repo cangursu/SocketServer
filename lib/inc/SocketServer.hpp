@@ -70,14 +70,6 @@ struct Payload
 };
 
 
-//TODO: Bad Technique. Find anther way than "Dynamic Polymorphism" for multpile connetions
-class PayloadImpl
-{
-    public:
-        virtual void Payload(::Payload &) = 0;
-};
-
-
 void to_string(const ::Payload &pck, std::ostringstream &ss);
 std::string to_string(const ::Payload &pck);
 
@@ -122,7 +114,7 @@ class SocketServer
         ESRV_RETCODE    Connect();
         ESRV_RETCODE    Reconnect();
         ESRV_RETCODE    Recv(Payload &packet, int fd);
-        ESRV_RETCODE    Send(TFdBaseSock *client, uint8_t *payload, uint16_t lenPayload);
+        ESRV_RETCODE    Send(TFdBaseSock *client, const uint8_t *payload, uint16_t lenPayload);
         ESRV_RETCODE    Start();
         void            Stop();
         ESRV_RETCODE    Wait();
@@ -420,7 +412,7 @@ ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Wait()
 
 
 template <typename TImpl, typename TFdBaseSock>
-ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Send(TFdBaseSock *client, uint8_t *payload, uint16_t lenPayload)
+ESRV_RETCODE SocketServer<TImpl, TFdBaseSock>::Send(TFdBaseSock *client, const uint8_t *payload, uint16_t lenPayload)
 {
     uint8_t packet[_lenMaxPacket] {};
     ssize_t lenPacket = PacketCreate(packet, _lenMaxPacket, payload, lenPayload);

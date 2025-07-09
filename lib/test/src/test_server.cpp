@@ -66,7 +66,6 @@ TEST(SocketServerLib, Test)
 
 class UdsTestServer_Src1
     : public FdBaseUds
-    , public PayloadImpl
 {
     public :
         UdsTestServer_Src1(const std::string &key)
@@ -86,7 +85,6 @@ class UdsTestServer_Src1
 
 class UdsTestServer_Src2
     : public FdBaseUds
-    , public PayloadImpl
 {
     public :
         UdsTestServer_Src2(const std::string &key)
